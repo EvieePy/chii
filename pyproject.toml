@@ -1,3 +1,6 @@
+[tool.setuptools]
+packages = []
+
 [project]
 name = "chii"
 version = "0.0.1"
