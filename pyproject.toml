@@ -15,11 +15,12 @@ dependencies = [
 dev = [
     "ruff",
     "pyright",
+    "isort",
 ]
 
 [tool.ruff]
 line-length = 120
-exclude = ["venv"]
+exclude = ["venv", "core/logger.py"]
 select = [
     "C4",
     "F",
@@ -49,6 +50,7 @@ ignore = [
     "ANN102",
     "ANN401",
     "UP031",
+    "PTH123",
 ]
 
 [tool.ruff.isort]

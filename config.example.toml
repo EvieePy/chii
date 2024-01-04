@@ -1,0 +1,15 @@
+[SERVER]
+host = "localhost"
+port = 3131
+
+[DATABASE]
+dsn = ""
+
+[LOGGING]
+# 0 = NOTSET
+# 10 = DEBUG
+# 20 = INFO (DEFAULT)
+# 30 = WARNING
+# 40 = ERROR
+# 50 = CRITICAL
+level = 20
