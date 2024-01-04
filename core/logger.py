@@ -74,7 +74,7 @@ class _ColourFormatter(logging.Formatter):
 
     FORMATS = {
         level: logging.Formatter(
-            f"{colour}%(levelname)s:{"":>4}\x1b[0m \x1b[34m%(name)s\x1b[0m %(message)s \x1b[30;1m%(asctime)s\x1b[0m",
+            f"{colour}%(levelname)s:{'':>4}\x1b[0m \x1b[34m%(name)s\x1b[0m %(message)s \x1b[30;1m%(asctime)s\x1b[0m",
             "%Y-%m-%d %H:%M:%S",
         )
         for level, colour in LEVEL_COLOURS
