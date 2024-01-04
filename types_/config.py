@@ -31,6 +31,10 @@ class LoggingConfig(TypedDict):
     level: int
 
 
+class OptionsConfig(TypedDict):
+    enable_signups: bool
+
+
 class ConfigType(TypedDict):
     SERVER: ServerConfig
     DATABASE: DatabaseConfig

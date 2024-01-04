@@ -22,14 +22,21 @@ import uvicorn
 
 import core
 import server
+from database import Database
 
 
 config = core.config
-core.setup_logging(level=logging.INFO)
+
+try:
+    LEVEL: int = int(config["LOGGING"]["level"])
+except Exception:
+    core.setup_logging(level=logging.INFO)
+else:
+    core.setup_logging(level=LEVEL)
 
 
 async def main() -> None:
-    async with server.Server() as app:
+    async with Database() as db, server.Server(database=db) as app:
         uvconfig: uvicorn.Config = uvicorn.Config(app=app, host=config["SERVER"]["host"], port=config["SERVER"]["port"])
         uvserver: uvicorn.Server = uvicorn.Server(config=uvconfig)
 

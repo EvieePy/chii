@@ -40,4 +40,10 @@ class Redirects(View):
 
     @route("/{id}", methods=["GET"], prefix=False)
     async def redirect_base(self, request: Request) -> Response:
-        return RedirectResponse(url="https://google.com/", status_code=307)
+        identifier: str = request.path_params["id"]
+        location: str | None = await self.app.database.retrieve_redirect(identifier)
+
+        if not location:
+            return Response(status_code=404)
+
+        return RedirectResponse(url=location, status_code=307)

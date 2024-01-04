@@ -15,5 +15,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from .api import API as API
-from .redirects import Redirects as Redirects
+import datetime
+from typing import TypedDict
+
+
+__all__ = ("BasicRedirect",)
+
+
+class BasicRedirect(TypedDict):
+    uid: int | None
+    expiry: datetime.datetime | None
+    location: str
