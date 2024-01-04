@@ -13,3 +13,6 @@ dsn = ""
 # 40 = ERROR
 # 50 = CRITICAL
 level = 20
+
+[OPTIONS]
+enable_signups = true
