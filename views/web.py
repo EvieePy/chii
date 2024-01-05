@@ -15,30 +15,29 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from typing import TypedDict
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING
+
+from starlette.responses import FileResponse
+
+from core import View, route
 
 
-class ServerConfig(TypedDict):
-    host: str
-    port: int
+if TYPE_CHECKING:
+    from starlette.requests import Request
+
+    from server import Server
 
 
-class DatabaseConfig(TypedDict):
-    dsn: str
+logger: logging.Logger = logging.getLogger(__name__)
 
 
-class LoggingConfig(TypedDict):
-    level: int
+class Web(View):
+    def __init__(self, app: Server) -> None:
+        self.app = app
 
-
-class OptionsConfig(TypedDict):
-    enable_signups: bool
-    max_url_length: int
-    min_url_length: int
-
-
-class ConfigType(TypedDict):
-    SERVER: ServerConfig
-    DATABASE: DatabaseConfig
-    LOGGING: LoggingConfig
-    OPTIONS: OptionsConfig
+    @route("/", methods=["GET"], prefix=False)
+    async def homepage(self, request: Request) -> FileResponse:
+        return FileResponse("web/pages/index.html")

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Something</title>
+    <!-- PACKAGES -->
+    <script src="/static/packages/htmx.min.js"></script>
+    <!-- SCRIPTS -->
+    <!-- STYLES -->
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+  </head>
+  <body>
+    
+    <div class="container">
+        <div class="innerWrapper">
+            <img src="/static/logo.png" class="logo">
+
+            <div class="urlForm">
+                <input name="url" type="url" class="urlInput" placeholder="Enter URL to Shorten...">
+                <span class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-include="[name='url']" hx-target="#submitResponse">Shorten URL</span>
+                <div id="submitResponse">
+
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>

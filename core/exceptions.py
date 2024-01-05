@@ -15,30 +15,15 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from typing import TypedDict
 
 
-class ServerConfig(TypedDict):
-    host: str
-    port: int
+class ChiiError(Exception):
+    """Base Chii Exception"""
 
 
-class DatabaseConfig(TypedDict):
-    dsn: str
+class URLValidationError(Exception):
+    """Exception thrown when a URL fails to pass validation."""
 
-
-class LoggingConfig(TypedDict):
-    level: int
-
-
-class OptionsConfig(TypedDict):
-    enable_signups: bool
-    max_url_length: int
-    min_url_length: int
-
-
-class ConfigType(TypedDict):
-    SERVER: ServerConfig
-    DATABASE: DatabaseConfig
-    LOGGING: LoggingConfig
-    OPTIONS: OptionsConfig
+    def __init__(self, *args: object, reason: str | None = None) -> None:
+        self.reason = reason
+        super().__init__(*args)

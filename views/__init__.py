@@ -17,3 +17,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from .api import API as API
 from .redirects import Redirects as Redirects
+from .web import Web as Web
