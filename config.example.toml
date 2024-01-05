@@ -16,3 +16,5 @@ level = 20
 
 [OPTIONS]
 enable_signups = true
+max_url_length = 1024
+min_url_length = 25
