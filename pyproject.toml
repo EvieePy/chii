@@ -12,6 +12,8 @@ dependencies = [
     "asyncpg==0.29.0",
     "asyncpg-stubs==0.29.1",
     "validators>=0.22.0",
+    "qrcode",
+    "pillow"
 ]
 
 [project.optional-dependencies]
