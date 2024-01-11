@@ -8,6 +8,7 @@
     <!-- PACKAGES -->
     <script src="/static/packages/htmx.min.js"></script>
     <!-- SCRIPTS -->
+    <script src="/static/scripts/general.js"></script>
     <!-- STYLES -->
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
@@ -15,17 +16,24 @@
   <body>
     
     <div class="container">
-        <div class="innerWrapper">
+        <div class="innerWrapper" hx-trigger="load" hx-get="/api/web/socials" hx-target="#socials">
             <img src="/static/logo.png" class="logo">
+            <div class="innerForm">
+                <form class="urlForm">
+                    <input name="url" type="url" class="urlInput" placeholder="Enter URL to Shorten...">
+                    <div class="submitOptions">
+                        <div class="submitOptionGroup">
+                            <input type="checkbox" name="qrbox" value="QR" class="checkBox"><span>Generate QR?</span>
+                        </div>
+                    </div>
+                    <span class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-target="#submitResponse">Shorten URL</span>
+                </form>
 
-            <div class="urlForm">
-                <input name="url" type="url" class="urlInput" placeholder="Enter URL to Shorten...">
-                <span class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-include="[name='url']" hx-target="#submitResponse">Shorten URL</span>
-                <div id="submitResponse">
-
-                </div>
+                <div id="submitResponse"></div>
             </div>
         </div>
+
+        <div id="socials"></div>
     </div>
   </body>
 </html>
