@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS redirects (
     uid BIGINT,
     expiry TIMESTAMPTZ,
     location TEXT NOT NULL,
+    views BIGINT NOT NULL DEFAULT 0,
     FOREIGN KEY(uid) REFERENCES users(id)
 );
