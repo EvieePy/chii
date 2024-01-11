@@ -35,6 +35,8 @@ class OptionsConfig(TypedDict):
     enable_signups: bool
     max_url_length: int
     min_url_length: int
+    github_url: str
+    discord_url: str
 
 
 class ConfigType(TypedDict):

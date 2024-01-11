@@ -18,3 +18,5 @@ level = 20
 enable_signups = true
 max_url_length = 1024
 min_url_length = 25
+github_url = ""
+discord_url = ""
