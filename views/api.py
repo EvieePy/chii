@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from starlette.requests import Request
 
     from server import Server
+    from types_ import Redirect
     from types_.requests import BasicRedirect
 
 
@@ -206,9 +207,9 @@ class API(View):
     @route("/qr/{id}", methods=["GET"], prefix=False)
     async def display_qr_code(self, request: Request) -> Response:
         identifier: str = request.path_params["id"]
-        location: str | None = await self.app.database.retrieve_redirect(identifier)
+        row: Redirect | None = await self.app.database.retrieve_redirect(identifier, plus=False)
 
-        if not location:
+        if not row:
             return Response(status_code=404)
 
         short: str = str(request.url_for("Redirects.redirect_base", id=identifier))

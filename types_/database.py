@@ -15,5 +15,16 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from .database import *
-from .requests import *
+import datetime
+from typing import TypedDict
+
+
+__all__ = ("Redirect",)
+
+
+class Redirect(TypedDict):
+    id: str
+    uid: int | None
+    expiry: datetime.datetime | None
+    location: str
+    views: int

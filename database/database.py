@@ -22,11 +22,12 @@ import logging
 import re
 import secrets
 import string
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 import asyncpg
 
 import core
+from types_ import Redirect
 
 
 if TYPE_CHECKING:
@@ -120,12 +121,23 @@ class Database:
 
         return identifier
 
-    async def retrieve_redirect(self, identifier: str) -> str | None:
-        query: str = """SELECT * FROM redirects WHERE id = $1"""
+    async def retrieve_redirect(self, identifier: str, *, plus: bool = False) -> Redirect | None:
+        query: str
+        if plus:
+            query = """
+            UPDATE redirects
+            SET views = views + 1
+            WHERE id = $1
+            RETURNING *
+            """
+        else:
+            query = """SELECT * FROM redirects WHERE id = $1"""
+
         async with self.pool.acquire() as connection:
             row: asyncpg.Record | None = await connection.fetchrow(query, identifier)
 
         if not row:
             return
 
-        return row["location"]
+        response: Redirect = cast(Redirect, row)
+        return response

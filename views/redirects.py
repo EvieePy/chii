@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from starlette.requests import Request
 
     from server import Server
+    from types_ import Redirect
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -41,9 +42,9 @@ class Redirects(View):
     @route("/{id}", methods=["GET"], prefix=False)
     async def redirect_base(self, request: Request) -> Response:
         identifier: str = request.path_params["id"]
-        location: str | None = await self.app.database.retrieve_redirect(identifier)
+        row: Redirect | None = await self.app.database.retrieve_redirect(identifier, plus=True)
 
-        if not location:
+        if not row:
             return Response(status_code=404)
 
-        return RedirectResponse(url=location, status_code=307)
+        return RedirectResponse(url=row["location"], status_code=307)
