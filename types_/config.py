@@ -42,6 +42,7 @@ class OptionsConfig(TypedDict):
 class Limits(TypedDict):
     create: str
     redirect: str
+    globals: list[str]
 
 
 class ConfigType(TypedDict):
