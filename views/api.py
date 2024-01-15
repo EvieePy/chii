@@ -290,7 +290,12 @@ class API(View):
             return Response(status_code=404)
 
         short: str = str(request.url_for("Redirects.redirect_base", id=identifier))
-        fp: io.BytesIO = await asyncio.to_thread(self.generate_qr, short)
+
+        try:
+            fp: io.BytesIO = await asyncio.to_thread(self.generate_qr, short)
+        except Exception:
+            return Response(status_code=500)
+
         return Response(fp.read(), media_type="image/png")
 
     @route("/stats/{id}", methods=["GET"])
