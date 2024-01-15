@@ -57,6 +57,7 @@ a {
 .logo {
     height: auto;
     width: 12rem;
+    user-select: none;
 }
 
 .urlForm {
@@ -210,6 +211,7 @@ a {
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
+    user-select: none;
 }
 
 .slogan > h1 {
