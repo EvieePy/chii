@@ -63,6 +63,11 @@ class API(View):
         if out is not True:
             raise URLValidationError
 
+        domain: str = config["DOMAIN"]["name"]
+
+        if domain in __value:
+            raise URLValidationError(f"Can not contain the domain: {domain}")
+
         max_: int = config["OPTIONS"]["max_url_length"]
         min_: int = config["OPTIONS"]["min_url_length"]
         len_: int = len(__value)

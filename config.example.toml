@@ -25,3 +25,6 @@ discord_url = ""
 create = "8/minute, 192/day"
 redirect = "2000/day"
 globals = ["5000/day"]
+
+[DOMAIN]
+name = "localhost"

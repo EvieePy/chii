@@ -45,9 +45,14 @@ class Limits(TypedDict):
     globals: list[str]
 
 
+class Domain(TypedDict):
+    name: str
+
+
 class ConfigType(TypedDict):
     SERVER: ServerConfig
     DATABASE: DatabaseConfig
     LOGGING: LoggingConfig
     OPTIONS: OptionsConfig
     LIMITS: Limits
+    DOMAIN: Domain
