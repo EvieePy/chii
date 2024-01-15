@@ -20,7 +20,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from starlette.responses import FileResponse
+from starlette.responses import FileResponse, Response
+from starlette.schemas import SchemaGenerator
 
 from core import View, route
 
@@ -34,6 +35,19 @@ if TYPE_CHECKING:
 logger: logging.Logger = logging.getLogger(__name__)
 
 
+schemas = SchemaGenerator(
+    {
+        "openapi": "3.1.0",
+        "info": {
+            "title": "Chii API",
+            "version": "1.0",
+            "summary": "A simple URL shortner.",
+            "description": "Chii is a simple, self hostable URL shortner.",
+        },
+    }
+)
+
+
 class Web(View):
     def __init__(self, app: Server) -> None:
         self.app = app
@@ -41,3 +55,15 @@ class Web(View):
     @route("/", methods=["GET"], prefix=False)
     async def homepage(self, request: Request) -> FileResponse:
         return FileResponse("web/pages/index.html")
+
+    @route("/stats", methods=["GET"], prefix=False)
+    async def stats(self, request: Request) -> Response:
+        return Response("Not implemented yet. See: /docs for an API endpoint.")
+
+    @route("/docs", methods=["GET"], prefix=False)
+    async def docs(self, request: Request) -> FileResponse:
+        return FileResponse("docs/index.html")
+
+    @route("/api/schema", methods=["GET"], prefix=False)
+    async def openapi_schema(self, request: Request) -> Response:
+        return schemas.OpenAPIResponse(request=request)

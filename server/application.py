@@ -43,7 +43,10 @@ class Server(core.Application):
         super().__init__(
             prefix=None,
             views=[views.Web(self), views.Redirects(self), views.API(self)],
-            routes=[Mount("/static", app=StaticFiles(directory="web/static"), name="static")],
+            routes=[
+                Mount("/static", app=StaticFiles(directory="web/static"), name="static"),
+                Mount("/docs", app=StaticFiles(directory="docs"), name="docs"),
+            ],
         )
 
         self.state.limiter = core.limiter
