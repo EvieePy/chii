@@ -20,6 +20,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
@@ -37,11 +39,15 @@ logger: logging.Logger = logging.getLogger(__name__)
 class Server(core.Application):
     def __init__(self, *, database: Database) -> None:
         self.database = database
+
         super().__init__(
             prefix=None,
             views=[views.Web(self), views.Redirects(self), views.API(self)],
             routes=[Mount("/static", app=StaticFiles(directory="web/static"), name="static")],
         )
+
+        self.state.limiter = core.limiter
+        self.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore
 
     async def setup_hook(self) -> None:
         logger.info("Server is setting up...")

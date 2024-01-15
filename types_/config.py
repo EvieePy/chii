@@ -39,8 +39,14 @@ class OptionsConfig(TypedDict):
     discord_url: str
 
 
+class Limits(TypedDict):
+    create: str
+    redirect: str
+
+
 class ConfigType(TypedDict):
     SERVER: ServerConfig
     DATABASE: DatabaseConfig
     LOGGING: LoggingConfig
     OPTIONS: OptionsConfig
+    LIMITS: Limits

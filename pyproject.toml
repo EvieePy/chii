@@ -8,6 +8,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "starlette>=0.34.0",
+    "slowapi>=0.1.8",
     "uvicorn>=0.25.0",
     "asyncpg==0.29.0",
     "asyncpg-stubs==0.29.1",

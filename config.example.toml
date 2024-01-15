@@ -20,3 +20,7 @@ max_url_length = 1024
 min_url_length = 25
 github_url = ""
 discord_url = ""
+
+[LIMITS]
+create = "8/minute, 192/day"
+redirect = "2000/day"

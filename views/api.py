@@ -30,7 +30,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from validators import ValidationError  # type: ignore
 from validators.url import url as URLVALIDATOR  # type: ignore
 
-from core import View, config, route
+from core import View, config, limiter, route
 from core.exceptions import URLValidationError
 
 
@@ -132,6 +132,7 @@ class API(View):
         return html
 
     @route("/create", methods=["POST"])
+    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
     async def create_url(self, request: Request) -> Response:
         try:
             data: dict[str, Any] = await request.json()
@@ -149,25 +150,28 @@ class API(View):
             validated: str = self.validate_url(location)
         except URLValidationError as e:
             return JSONResponse(
-                {"error": "An incorrect, invalid or improper URL was passed.", "extras": e.reason}, status_code=400
+                {"error": f"An incorrect, invalid or improper URL was passed: {e.reason}", "extra": e.reason},
+                status_code=400,
             )
 
         payload: BasicRedirect = {"uid": None, "expiry": None, "location": validated}
-        identifier: str = await self.app.database.create_redirect(data=payload)
+        row: Redirect | None = await self.app.database.create_redirect(data=payload)
 
-        # TODO: We probably shouldn't rely soley on request.url_for here and implement a fallback...
-        return JSONResponse({"url": str(request.url_for("Redirects.redirect_base", id=identifier))})
+        if not row:
+            return JSONResponse({"error": "Internal server error: (Database)"}, status_code=500)
+
+        data = dict(row)
+        data.pop("uid", None)
+
+        data["url"] = str(request.url_for("Redirects.redirect_base", id=data["id"]))
+        data["qr"] = str(request.url_for("API.display_qr_code", id=data["id"]))
+
+        return JSONResponse(data)
 
     @route("/web/create", methods=["POST"])
+    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
     async def web_create_url(self, request: Request) -> Response:
-        async with request.form() as form:
-            location: UploadFile | str | None = form.get("url", None)
-            should_qr: UploadFile | str | bool = form.get("qrbox", False)
-
-        try:
-            validated: str = self.validate_url(location)
-        except URLValidationError as e:
-            error_html: str = """
+        error_html: str = """
             <p>
                 <h3 class="error validationHeader">
                     Error:
@@ -175,14 +179,25 @@ class API(View):
                 {reason}
             </p>
             """
+
+        async with request.form() as form:
+            location: UploadFile | str | None = form.get("url", None)
+            should_qr: UploadFile | str | bool = form.get("qrbox", False)
+
+        try:
+            validated: str = self.validate_url(location)
+        except URLValidationError as e:
             reason: str = e.reason or "The provided URL is invalid or forbidden!"
             return HTMLResponse(error_html.format(reason=reason))
 
         payload: BasicRedirect = {"uid": None, "expiry": None, "location": validated}
-        identifier: str = await self.app.database.create_redirect(data=payload)
+        row: Redirect | None = await self.app.database.create_redirect(data=payload)
+        if not row:
+            return HTMLResponse(error_html.format(reason="Internal API Error... Please try again later."))
+
         generate_qr: bool = bool(should_qr)
 
-        html: str = self.generate_html(request, identifier=identifier, should_qr=generate_qr)
+        html: str = self.generate_html(request, identifier=row["id"], should_qr=generate_qr)
         return HTMLResponse(html)
 
     @route("/web/socials", methods=["GET"])
@@ -205,6 +220,7 @@ class API(View):
         return HTMLResponse(html)
 
     @route("/qr/{id}", methods=["GET"], prefix=False)
+    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
     async def display_qr_code(self, request: Request) -> Response:
         identifier: str = request.path_params["id"]
         row: Redirect | None = await self.app.database.retrieve_redirect(identifier, plus=False)
@@ -215,3 +231,19 @@ class API(View):
         short: str = str(request.url_for("Redirects.redirect_base", id=identifier))
         fp: io.BytesIO = await asyncio.to_thread(self.generate_qr, short)
         return Response(fp.read(), media_type="image/png")
+
+    @route("/stats/{id}", methods=["GET"])
+    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
+    async def redirect_stats(self, request: Request) -> Response:
+        identifier: str = request.path_params["id"]
+        row: Redirect | None = await self.app.database.retrieve_redirect(identifier, plus=False)
+
+        if not row:
+            return Response(status_code=404)
+
+        data = dict(row)
+        data.pop("uid", None)
+        data["url"] = str(request.url_for("Redirects.redirect_base", id=identifier))
+        data["qr"] = str(request.url_for("API.display_qr_code", id=identifier))
+
+        return JSONResponse(data)
