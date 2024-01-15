@@ -18,6 +18,10 @@
     <div class="container">
         <div class="innerWrapper" hx-trigger="load" hx-get="/api/web/socials" hx-target="#socials">
             <img src="/static/logo.png" class="logo">
+            <div class="slogan">
+                <h1>Chii</h2>
+                <span>Simple URL shortener...</span>
+            </div>
             <div class="innerForm">
                 <form class="urlForm">
                     <input name="url" type="url" class="urlInput" placeholder="Enter URL to Shorten...">
@@ -26,7 +30,7 @@
                             <input type="checkbox" name="qrbox" value="QR" class="checkBox"><span>Generate QR?</span>
                         </div>
                     </div>
-                    <span class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-target="#submitResponse">Shorten URL</span>
+                    <span id="_submit_button" class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-target="#submitResponse">Shorten URL</span>
                 </form>
 
                 <div id="submitResponse"></div>

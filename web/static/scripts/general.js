@@ -26,3 +26,15 @@ function submitButtonValidation(success) {
         urlSubmit.innerText = urlSubmitOriginal;
     }, 2000);
 }
+
+
+document.addEventListener("htmx:responseError", function(e) {
+    if (e.detail.xhr.status === 429) {
+        e.detail.requestConfig.target.innerHTML = `
+        <p>
+            <h3 class="error validationHeader">Error:</h3>
+            Slow down! You are requesting too fast. Try again later...
+        </p>
+        `
+    }
+});
