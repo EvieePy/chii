@@ -111,15 +111,21 @@ class Database:
             print(f"\n\n----START ADMIN ACCOUNT TOKEN----\n\n{token}\n\n----END ADMIN ACCOUNT TOKEN------\n\n")
             logger.info("Successfully created the ADMIN ACCOUNT.")
 
-    async def create_redirect(self, data: BasicRedirect) -> str:
+    async def create_redirect(self, data: BasicRedirect) -> Redirect | None:
         query: str = """
-        INSERT INTO redirects(id, uid, expiry, location) VALUES($1, $2, $3, $4)
+        INSERT INTO redirects(id, uid, expiry, location) VALUES($1, $2, $3, $4) RETURNING *
         """
         identifier: str = "".join(secrets.choice(ALPHABET) for _ in range(8))
         async with self.pool.acquire() as connection:
-            await connection.execute(query, identifier, data["uid"], data["expiry"], data["location"])
+            row: asyncpg.Record | None = await connection.fetchrow(
+                query, identifier, data["uid"], data["expiry"], data["location"]
+            )
 
-        return identifier
+        if not row:
+            return
+
+        response: Redirect = cast(Redirect, row)
+        return response
 
     async def retrieve_redirect(self, identifier: str, *, plus: bool = False) -> Redirect | None:
         query: str
