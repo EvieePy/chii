@@ -91,6 +91,7 @@ a {
     text-align: center;
     color: var(--button-color);
     user-select: none;
+    border: none;
 }
 
 .urlSubmit:hover {

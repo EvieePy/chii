@@ -30,7 +30,7 @@
                             <input type="checkbox" name="qrbox" value="QR" class="checkBox"><span>Generate QR?</span>
                         </div>
                     </div>
-                    <span id="_submit_button" class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-target="#submitResponse">Shorten URL</span>
+                    <input type="submit" id="_submit_button" class="urlSubmit" hx-post="/api/web/create" hx-trigger="click" hx-target="#submitResponse" value="Shorten URL" />
                 </form>
 
                 <div id="submitResponse"></div>
