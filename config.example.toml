@@ -22,9 +22,11 @@ github_url = ""
 discord_url = ""
 
 [LIMITS]
-create = "8/minute, 192/day"
-redirect = "2000/day"
-globals = ["5000/day"]
+create = {"rate" = 8, "per" = 60}
+qr = {"rate" = 12, "per" = 60}
+stats = {"rate" = 30, "per" = 60}
+redirect = {"rate" = 2000, "per" = 86400}
+homepage = {"rate" = 2000, "per" = 86400}
 
 [DOMAIN]
 name = "localhost"
