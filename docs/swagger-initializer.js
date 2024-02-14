@@ -4,6 +4,7 @@ window.onload = function() {
   // the following lines will be replaced by docker/configurator, when it runs in a docker-container
   window.ui = SwaggerUIBundle({
     url: "/api/schema",
+    validatorUrl: null,
     dom_id: '#swagger-ui',
     supportedSubmitMethods: [],
     deepLinking: true,
