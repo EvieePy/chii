@@ -56,7 +56,7 @@ class Store:
         max_interval: float = limit.period.total_seconds() - limit.inverse
 
         if separation > max_interval:
-            return separation
+            return separation - max_interval
 
         new_tat: datetime.datetime = max(tat, now) + datetime.timedelta(seconds=limit.inverse)
         cls.set_tat(key, tat=new_tat)
