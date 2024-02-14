@@ -15,20 +15,33 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import datetime
-from collections.abc import Coroutine
-from typing import Any, TypeAlias, TypedDict
+from __future__ import annotations
 
-from starlette.responses import Response
+from collections.abc import Awaitable, Callable
+from typing import Any, Literal, TypeAlias, TypedDict
 
+from starlette.requests import Request
 
-__all__ = ("BasicRedirect", "ResponseType")
+from core.core import _Route
 
-
-class BasicRedirect(TypedDict):
-    uid: int | None
-    expiry: datetime.datetime | None
-    location: str
+from .requests import ResponseType
 
 
-ResponseType: TypeAlias = Coroutine[Any, Any, Response]
+__all__ = ("RateLimit", "ExemptCallable", "LimitDecorator", "T_LimitDecorator", "RateLimitData")
+
+
+ExemptCallable: TypeAlias = Callable[[Request], Awaitable[bool]] | None
+LimitDecorator: TypeAlias = Callable[[Any, Request], ResponseType] | _Route
+T_LimitDecorator: TypeAlias = Callable[..., LimitDecorator]
+
+
+class RateLimitData(TypedDict):
+    rate: int
+    per: int
+    bucket: Literal["ip", "user"]
+    exempt: ExemptCallable
+
+
+class RateLimit(TypedDict):
+    rate: int
+    per: int

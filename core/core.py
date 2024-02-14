@@ -20,20 +20,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from __future__ import annotations
+
 import asyncio
 import inspect
-from collections.abc import Callable, Coroutine, Iterator
-from typing import Any, Self, TypeAlias
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
-from starlette.types import Receive, Scope, Send
+
+from .limiter import RateLimit, Store
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
+    from starlette.types import Receive, Scope, Send
+
+    from types_ import ExemptCallable, LimitDecorator, RateLimitData, ResponseType, T_LimitDecorator
 
 
 __all__ = (
     "route",
+    "limit",
     "View",
     "Application",
     "WebsocketCloseCodes",
@@ -42,8 +53,6 @@ __all__ = (
     "WebsocketNotificationTypes",
 )
 
-ResponseType: TypeAlias = Coroutine[Any, Any, Response]
-
 
 class _Route:
     def __init__(self, **kwargs: Any) -> None:
@@ -51,11 +60,22 @@ class _Route:
         self._coro: Callable[[Any, Request], ResponseType] = kwargs["coro"]
         self._methods: list[str] = kwargs["methods"]
         self._prefix: bool = kwargs["prefix"]
+        self._limits: RateLimitData = kwargs.get("limits", {})
 
         self._view: View | None = None
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         request = Request(scope, receive, send)
+        ip: str = request.headers.get("X-Forwarded-For", None) or request.client.host  # type: ignore
+
+        if self._limits and ip not in ("127.0.0.1", "::1"):
+            limit: RateLimit = RateLimit(self._limits["rate"], self._limits["per"])  # TODO: Buckets...
+            key: str = f"{ip}@{self._path}"
+
+            if retry := Store.update(key, limit):
+                response = Response(status_code=429, headers={"Retry-After": str(retry)})
+                await response(scope, receive, send)
+                return
 
         response = await self._coro(self._view, request)
         await response(scope, receive, send)
@@ -82,7 +102,24 @@ def route(path: str, /, *, methods: list[str] = ["GET"], prefix: bool = True) ->
         if coro.__name__.lower() in disallowed:
             raise ValueError(f'Route callback function must not be named any: {", ".join(disallowed)}')
 
-        return _Route(path=path, coro=coro, methods=methods, prefix=prefix)
+        limits: RateLimitData = getattr(coro, "__limits__", {})  # type: ignore
+        return _Route(path=path, coro=coro, methods=methods, prefix=prefix, limits=limits)
+
+    return decorator
+
+
+def limit(
+    rate: int, per: int, *, bucket: Literal["ip", "user"] = "ip", exempt: ExemptCallable = None
+) -> T_LimitDecorator:
+    def decorator(coro: Callable[[Any, Request], ResponseType] | _Route) -> LimitDecorator:
+        limits: RateLimitData = {"rate": rate, "per": per, "bucket": bucket, "exempt": exempt}
+
+        if isinstance(coro, _Route):
+            coro._limits = limits
+        else:
+            setattr(coro, "__limits__", limits)
+
+        return coro
 
     return decorator
 
@@ -131,9 +168,12 @@ class View:
                 # Due to the way Starlette works, this allows us to have schema documentation...
                 setattr(member, method, member._coro)
 
-            self.__routes__.append(
-                Route(path=path, endpoint=member, methods=member._methods, name=f"{name}.{member._coro.__name__}")
+            new: Route = Route(
+                path=path, endpoint=member, methods=member._methods, name=f"{name}.{member._coro.__name__}"
             )
+            new.limits = getattr(member, "_limits", {})  # type: ignore
+
+            self.__routes__.append(new)
 
         return self
 
@@ -209,6 +249,7 @@ class Application(Starlette):
         for route_ in view:
             path = f'/{self._prefix.lstrip("/")}{route_.path}' if self._prefix else route_.path
             new = Route(path, endpoint=route_.endpoint, methods=route_.methods, name=route_.name)  # type: ignore
+            new.limits = route_.limits  # type: ignore
 
             self.router.routes.append(new)
 

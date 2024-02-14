@@ -39,10 +39,17 @@ class OptionsConfig(TypedDict):
     discord_url: str
 
 
+class RateLimit(TypedDict):
+    rate: int
+    per: int
+
+
 class Limits(TypedDict):
-    create: str
-    redirect: str
-    globals: list[str]
+    create: RateLimit
+    redirect: RateLimit
+    qr: RateLimit
+    stats: RateLimit
+    homepage: RateLimit
 
 
 class Domain(TypedDict):

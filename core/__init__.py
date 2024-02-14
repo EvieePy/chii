@@ -18,5 +18,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from .config import config as config
 from .core import *
 from .exceptions import *
-from .limiter import limiter as limiter
 from .logger import *
