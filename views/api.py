@@ -30,7 +30,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from validators import ValidationError  # type: ignore
 from validators.url import url as URLVALIDATOR  # type: ignore
 
-from core import View, config, limiter, route
+from core import View, config, limit, route
 from core.exceptions import URLValidationError
 
 
@@ -137,7 +137,7 @@ class API(View):
         return html
 
     @route("/create", methods=["POST"])
-    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
+    @limit(config["LIMITS"]["create"]["rate"], config["LIMITS"]["create"]["per"])
     async def create_url(self, request: Request) -> Response:
         """Create a shortened URL via API.
 
@@ -230,7 +230,7 @@ class API(View):
         return JSONResponse(data)
 
     @route("/web/create", methods=["POST"])
-    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
+    @limit(config["LIMITS"]["create"]["rate"], config["LIMITS"]["create"]["per"])
     async def web_create_url(self, request: Request) -> Response:
         error_html: str = """
             <p>
@@ -286,7 +286,7 @@ class API(View):
         return HTMLResponse(html)
 
     @route("/qr/{id}", methods=["GET"], prefix=False)
-    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
+    @limit(config["LIMITS"]["qr"]["rate"], config["LIMITS"]["qr"]["per"])
     async def display_qr_code(self, request: Request) -> Response:
         identifier: str = request.path_params["id"]
         row: Redirect | None = await self.app.database.retrieve_redirect(identifier, plus=False)
@@ -304,7 +304,7 @@ class API(View):
         return Response(fp.read(), media_type="image/png")
 
     @route("/stats/{id}", methods=["GET"])
-    @limiter.limit(config["LIMITS"]["create"])  # type: ignore
+    @limit(config["LIMITS"]["stats"]["rate"], config["LIMITS"]["stats"]["per"])
     async def redirect_stats(self, request: Request) -> Response:
         """Create a shortened URL via API.
 

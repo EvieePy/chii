@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 from starlette.responses import FileResponse, Response
 from starlette.schemas import SchemaGenerator
 
-from core import View, route
+from core import View, config, limit, route
 
 
 if TYPE_CHECKING:
@@ -53,14 +53,17 @@ class Web(View):
         self.app = app
 
     @route("/", methods=["GET"], prefix=False)
+    @limit(config["LIMITS"]["homepage"]["rate"], config["LIMITS"]["homepage"]["per"])
     async def homepage(self, request: Request) -> FileResponse:
         return FileResponse("web/pages/index.html")
 
     @route("/stats", methods=["GET"], prefix=False)
+    @limit(config["LIMITS"]["stats"]["rate"], config["LIMITS"]["stats"]["per"])
     async def stats(self, request: Request) -> Response:
         return Response("Not implemented yet. See: /docs for an API endpoint.")
 
     @route("/docs", methods=["GET"], prefix=False)
+    @limit(config["LIMITS"]["homepage"]["rate"], config["LIMITS"]["homepage"]["per"])
     async def docs(self, request: Request) -> FileResponse:
         return FileResponse("docs/index.html")
 

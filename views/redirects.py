@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 
 from starlette.responses import RedirectResponse, Response
 
-from core import View, config, limiter, route
+from core import View, config, limit, route
 
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ class Redirects(View):
         self.app = app
 
     @route("/{id}", methods=["GET"], prefix=False)
-    @limiter.limit(config["LIMITS"]["redirect"])  # type: ignore
+    @limit(config["LIMITS"]["redirect"]["rate"], config["LIMITS"]["redirect"]["per"])
     async def redirect_base(self, request: Request) -> Response:
         identifier: str = request.path_params["id"]
         row: Redirect | None = await self.app.database.retrieve_redirect(identifier, plus=True)
