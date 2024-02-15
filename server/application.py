@@ -20,6 +20,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 
@@ -44,6 +46,15 @@ class Server(core.Application):
             routes=[
                 Mount("/static", app=StaticFiles(directory="web/static"), name="static"),
                 Mount("/docs", app=StaticFiles(directory="docs"), name="docs"),
+            ],
+            middleware=[
+                Middleware(
+                    CORSMiddleware,
+                    allow_origins=["*"],
+                    allow_credentials=True,
+                    allow_methods=["*"],
+                    allow_headers=["*"],
+                )
             ],
         )
 
