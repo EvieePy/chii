@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self
 
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 from .limiter import RateLimit, Store
@@ -73,7 +73,11 @@ class _Route:
             key: str = f"{ip}@{self._path}"
 
             if retry := Store.update(key, limit):
-                response = Response(status_code=429, headers={"Retry-After": str(retry)})
+                response = JSONResponse(
+                    {"error": "You are requesting too fast. Slow down!"},
+                    status_code=429,
+                    headers={"Retry-After": str(retry)},
+                )
                 await response(scope, receive, send)
                 return
 
