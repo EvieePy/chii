@@ -68,7 +68,11 @@ class _Route:
         request = Request(scope, receive, send)
         ip: str = request.headers.get("X-Forwarded-For", None) or request.client.host  # type: ignore
 
-        if self._limits and ip not in ("127.0.0.1", "::1"):
+        exempt: ExemptCallable = self._limits.get("exempt", None)
+        if exempt is not None and await exempt(request):
+            pass
+
+        elif self._limits and ip not in ("127.0.0.1", "::1"):
             limit: RateLimit = RateLimit(self._limits["rate"], self._limits["per"])  # TODO: Buckets...
             key: str = f"{ip}@{self._path}"
 
@@ -115,6 +119,23 @@ def route(path: str, /, *, methods: list[str] = ["GET"], prefix: bool = True) ->
 def limit(
     rate: int, per: int, *, bucket: Literal["ip", "user"] = "ip", exempt: ExemptCallable = None
 ) -> T_LimitDecorator:
+    """Decorator which allows a Route to have a rate limit.
+
+    Rate limits use the GCRA algorithm and are stored in memory.
+
+    Parameters
+    ----------
+    rate: int
+        The number of requests allowed per period.
+    per: int
+        The period in seconds.
+    bucket: Literal["ip", "user"]
+        The bucket to use for rate limiting. Defaults to "ip".
+    exempt: Optional[ExemptCallable]
+        An awaitable which takes a `starlette.requests.Request` and returns a boolean. If this returns True, the rate
+        limit is not applied. Defaults to None.
+    """
+
     def decorator(coro: Callable[[Any, Request], ResponseType] | _Route) -> LimitDecorator:
         limits: RateLimitData = {"rate": rate, "per": per, "bucket": bucket, "exempt": exempt}
 

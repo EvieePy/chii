@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any, Literal, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypedDict
 
 from starlette.requests import Request
 
@@ -27,7 +27,11 @@ from core.core import _Route
 from .requests import ResponseType
 
 
-__all__ = ("RateLimit", "ExemptCallable", "LimitDecorator", "T_LimitDecorator", "RateLimitData")
+if TYPE_CHECKING:
+    import datetime
+
+
+__all__ = ("RateLimit", "ExemptCallable", "LimitDecorator", "T_LimitDecorator", "RateLimitData", "TatStore")
 
 
 ExemptCallable: TypeAlias = Callable[[Request], Awaitable[bool]] | None
@@ -45,3 +49,8 @@ class RateLimitData(TypedDict):
 class RateLimit(TypedDict):
     rate: int
     per: int
+
+
+class TatStore(TypedDict):
+    tat: datetime.datetime
+    limit: Any

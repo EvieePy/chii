@@ -19,10 +19,14 @@ from __future__ import annotations
 
 import datetime
 import logging
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+
+if TYPE_CHECKING:
+    from types_ import TatStore
 
 
 class RateLimit:
@@ -36,21 +40,26 @@ class RateLimit:
 
 
 class Store:
-    __keys: ClassVar[dict[str, datetime.datetime]] = {}
+    __keys: ClassVar[dict[str, TatStore]] = {}
 
     @classmethod
     def get_tat(cls, key: str, /) -> datetime.datetime:
         now: datetime.datetime = datetime.datetime.now(tz=datetime.UTC)
-        return cls.__keys.get(key, now)
+        return cls.__keys.get(key, {"tat": now}).get("tat", now)
 
     @classmethod
-    def set_tat(cls, key: str, /, *, tat: datetime.datetime) -> None:
-        cls.__keys[key] = tat
+    def set_tat(cls, key: str, /, *, tat: datetime.datetime, limit: RateLimit) -> None:
+        cls.__keys[key] = {"tat": tat, "limit": limit}
 
     @classmethod
     def update(cls, key: str, limit: RateLimit) -> bool | float:
         now: datetime.datetime = datetime.datetime.now(tz=datetime.UTC)
         tat: datetime.datetime = max(cls.get_tat(key), now)
+
+        # Clear stale keys...
+        for ek, ev in cls.__keys.copy().items():
+            if (now - ev["tat"]).total_seconds() > ev["limit"].period.total_seconds() + 60:
+                del cls.__keys[ek]
 
         separation: float = (tat - now).total_seconds()
         max_interval: float = limit.period.total_seconds() - limit.inverse
@@ -59,6 +68,6 @@ class Store:
             return separation - max_interval
 
         new_tat: datetime.datetime = max(tat, now) + datetime.timedelta(seconds=limit.inverse)
-        cls.set_tat(key, tat=new_tat)
+        cls.set_tat(key, tat=new_tat, limit=limit)
 
         return False
