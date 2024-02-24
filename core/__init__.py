@@ -19,3 +19,4 @@ from .config import config as config
 from .core import *
 from .exceptions import *
 from .logger import *
+from .sessions import SessionMiddleware as SessionMiddleware

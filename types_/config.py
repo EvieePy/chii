@@ -56,6 +56,17 @@ class Domain(TypedDict):
     name: str
 
 
+class RedisConfig(TypedDict):
+    host: str
+    port: int
+    db: int
+
+
+class SessionsConfig(TypedDict):
+    secret: str
+    max_age: int
+
+
 class ConfigType(TypedDict):
     SERVER: ServerConfig
     DATABASE: DatabaseConfig
@@ -63,3 +74,5 @@ class ConfigType(TypedDict):
     OPTIONS: OptionsConfig
     LIMITS: Limits
     DOMAIN: Domain
+    REDIS: RedisConfig
+    SESSIONS: SessionsConfig

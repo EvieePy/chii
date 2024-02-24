@@ -54,7 +54,12 @@ class Server(core.Application):
                     allow_credentials=True,
                     allow_methods=["*"],
                     allow_headers=["*"],
-                )
+                ),
+                Middleware(
+                    core.SessionMiddleware,
+                    secret=core.config["SESSIONS"]["secret"],
+                    max_age=core.config["SESSIONS"]["max_age"],
+                ),
             ],
         )
 

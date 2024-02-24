@@ -30,3 +30,12 @@ homepage = {"rate" = 2000, "per" = 86400}
 
 [DOMAIN]
 name = "localhost"
+
+[REDIS]
+host = "localhost"
+port = 6379
+db = 0
+
+[SESSIONS]
+secret = "" # Large random string; use print(secrets.token_urlsafe(128)) to generate for example
+max_age = 604800  # seconds... 604800 = 1 week
